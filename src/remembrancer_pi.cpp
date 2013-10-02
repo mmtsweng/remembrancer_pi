@@ -30,8 +30,6 @@ wxAuiManager    *m_AUImgr;
 
 int remembrancer_pi::Init(void)
 {
-    wxLogMessage(_T("REMEMBRANCER: Init"));
-
     // Get a pointer to the opencpn display canvas, to use as a parent for windows created
     m_parent_window = GetOCPNCanvasWindow();
 
@@ -54,23 +52,11 @@ int remembrancer_pi::Init(void)
 
     m_AUImgr = GetFrameAuiManager();
     m_AUImgr->AddPane(m_alertWindow);
-    m_AUImgr->GetPane(m_alertWindow).Name(_T("Alert!"));
-    m_AUImgr->GetPane(m_alertWindow).Float();
-    m_AUImgr->GetPane(m_alertWindow).CaptionVisible(true);
-    m_AUImgr->GetPane(m_alertWindow).GripperTop(true);
     m_AUImgr->GetPane(m_alertWindow).CloseButton(true);
     m_AUImgr->GetPane(m_alertWindow).Show(false);
     m_AUImgr->Update();
 
-    struct tm initTime;
-    time_t now;
-    initTime = *localtime(&now);
-    initTime.tm_mday--;
-
-    m_lastAutopilotFix = mktime(&initTime);
-    m_timer.Connect(wxEVT_TIMER, wxTimerEventHandler(remembrancer_pi::OnTimer), NULL, this);
-    m_timer.Start(5000);
-
+    InitAutopilotStatus();
 
     return (
         INSTALLS_CONTEXTMENU_ITEMS     |
@@ -80,7 +66,10 @@ int remembrancer_pi::Init(void)
     );
 }
 
-///
+/*
+    DeInitialize the plugin
+        Disconnect timer
+*/
 bool remembrancer_pi::DeInit(void)
 {
     wxLogMessage(_T("REMEMBRANCER: DeInit"));
@@ -110,15 +99,16 @@ bool remembrancer_pi::DeInit(void)
 void remembrancer_pi::OnTimer(wxTimerEvent& event)
 {
     double secondsPassed = difftime(time(0), m_lastAutopilotFix);
-    //wxString msg(_T("REMEMBRANCER: Seconds since Autopilot:"));
-    //msg += secondsPassed;
+    //wxString msg;
+    //msg.Printf(wxT("REMEMBRANCER: %.0f Seconds since Autopilot:"), secondsPassed);
     //wxLogMessage(msg);
 
-    if (secondsPassed > 0 && secondsPassed < 2)
+    if (secondsPassed >=0 && secondsPassed < 2)
     {
         wxString message;
-        message.Printf(wxT("REMEMBRANCER: %d passed. Alarm!!!!"), secondsPassed);
+        message.Printf(wxT("%.0f seconds passed. Alarm!!!!"), secondsPassed);
         wxMessageDialog mdlg(m_parent_window, message,_("Watchman"), wxOK | wxICON_ERROR);
+        wxLogMessage(message);
         mdlg.ShowModal();
     }
 }
@@ -158,6 +148,24 @@ double remembrancer_pi::SecondsSinceAutopilotUpdate()
     return difftime(time(0), m_lastAutopilotFix);
 }
 
+/*
+    InitAutopilotStatus
+        Make sure alerts don't show up until autopilot NMEA messages are parsed
+        Start reminder-check timer
+*/
+void remembrancer_pi::InitAutopilotStatus()
+{
+    //Last fix a long time ago. :-)
+    struct tm initTime;
+    time_t now;
+    initTime = *localtime(&now);
+    initTime.tm_hour = initTime.tm_hour-12;
+    m_lastAutopilotFix = mktime(&initTime);
+
+    //Start Timer
+    m_timer.Connect(wxEVT_TIMER, wxTimerEventHandler(remembrancer_pi::OnTimer), NULL, this);
+    m_timer.Start(10 * 1000);
+}
 
 int remembrancer_pi::GetAPIVersionMajor()
 {
