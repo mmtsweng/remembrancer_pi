@@ -15,6 +15,7 @@
 #define     MY_API_VERSION_MAJOR    1
 #define     MY_API_VERSION_MINOR    8
 
+#include "time.h"
 #include "../include/opencpn/ocpn_plugin.h"
 #include "../include/nmea0183/nmea0183.h"
 #include "dialogDefinitions.h"
@@ -44,6 +45,7 @@ public:
     wxString GetLongDescription();
 
     //    The optional method overrides
+    void SetNMEASentence(wxString &sentence);
     void OnContextMenuItemCallback(int id);
     void UpdateAuiStatus(void);
     void OnTimer(wxTimerEvent& event);
@@ -60,11 +62,15 @@ public:
 
 
 private:
+    //Private Methods
+    double SecondsSinceAutopilotUpdate();
+
     // UI Windows
     PropertyDialog  *m_propertiesWindow;
     AlertDialog     *m_alertWindow;
     NMEA0183         m_NMEA;
     wxTimer          m_timer;
+    time_t           m_lastAutopilotFix;
 
     wxWindow        *m_parent_window;
     wxAuiManager    *m_AUImgr;

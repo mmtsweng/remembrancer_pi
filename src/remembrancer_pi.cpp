@@ -7,6 +7,7 @@
 #endif //precompiled headers
 
 #include <wx/aui/aui.h>
+#include "time.h"
 #include "remembrancer_pi.h"
 #include "dialogDefinitions.h"
 
@@ -29,7 +30,7 @@ wxAuiManager    *m_AUImgr;
 
 int remembrancer_pi::Init(void)
 {
-    printf("REMEMBRANCER: Init");
+    wxLogMessage(_T("REMEMBRANCER: Init"));
 
     // Get a pointer to the opencpn display canvas, to use as a parent for windows created
     m_parent_window = GetOCPNCanvasWindow();
@@ -61,13 +62,20 @@ int remembrancer_pi::Init(void)
     m_AUImgr->GetPane(m_alertWindow).Show(false);
     m_AUImgr->Update();
 
+    struct tm initTime;
+    time_t now;
+    initTime = *localtime(&now);
+    initTime.tm_mday--;
+
+    m_lastAutopilotFix = mktime(&initTime);
     m_timer.Connect(wxEVT_TIMER, wxTimerEventHandler(remembrancer_pi::OnTimer), NULL, this);
-    m_timer.Start(30000);
+    m_timer.Start(5000);
 
 
     return (
         INSTALLS_CONTEXTMENU_ITEMS     |
         WANTS_NMEA_SENTENCES           |
+        WANTS_NMEA_EVENTS              |
         USES_AUI_MANAGER
     );
 }
@@ -75,28 +83,81 @@ int remembrancer_pi::Init(void)
 ///
 bool remembrancer_pi::DeInit(void)
 {
-    printf("REMEMBRANCER: DeInit");
+    wxLogMessage(_T("REMEMBRANCER: DeInit"));
     m_AUImgr->DetachPane(m_alertWindow);
     m_AUImgr->DetachPane(m_propertiesWindow);
     if(m_alertWindow)
     {
-    m_alertWindow->Close();
+        m_alertWindow->Close();
     }
 
     if (m_propertiesWindow)
     {
-    m_propertiesWindow->Close();
+        m_propertiesWindow->Close();
     }
+
+    m_timer.Stop();
+    m_timer.Disconnect(wxEVT_TIMER, wxTimerEventHandler(remembrancer_pi::OnTimer), NULL, this);
+
     return true;
 }
 
+/*
+    Timer Event
+        Fires every X ms
+        Check to see if we are actively following a route, and alert if so
+*/
 void remembrancer_pi::OnTimer(wxTimerEvent& event)
 {
-    m_AUImgr->GetPane(m_alertWindow).Show(true);
-    m_AUImgr->Update();
-    wxMessageDialog mdlg(m_parent_window, _("ALARM!!!!"),_("Watchman"), wxOK | wxICON_ERROR);
-    mdlg.ShowModal();
+    double secondsPassed = difftime(time(0), m_lastAutopilotFix);
+    //wxString msg(_T("REMEMBRANCER: Seconds since Autopilot:"));
+    //msg += secondsPassed;
+    //wxLogMessage(msg);
+
+    if (secondsPassed > 0 && secondsPassed < 2)
+    {
+        wxString message;
+        message.Printf(wxT("REMEMBRANCER: %d passed. Alarm!!!!"), secondsPassed);
+        wxMessageDialog mdlg(m_parent_window, message,_("Watchman"), wxOK | wxICON_ERROR);
+        mdlg.ShowModal();
+    }
 }
+
+/*
+    NMEA Sentance Event
+        Called by OpenCPN
+        Checks for selected Autopilot NMEA sentances, and saves time received
+*/
+void remembrancer_pi::SetNMEASentence(wxString &sentence)
+{
+    m_NMEA << sentence;
+
+    if(m_NMEA.PreParse())
+    {
+        if(m_NMEA.LastSentenceIDReceived == _T("RMC"))
+        {
+            if(m_NMEA.Parse())
+            {
+                if(m_NMEA.Rmc.IsDataValid == NTrue)
+                {
+                    //wxString msg(_T("REMEMBRANCER: RMB Messasge Parsed!"));
+                    //wxLogMessage(msg);
+
+                    time(&m_lastAutopilotFix);
+                }
+            }
+        }
+    }
+}
+
+/*
+    Number of seconds elapsed since the last Autopilot NMEA Message was received
+*/
+double remembrancer_pi::SecondsSinceAutopilotUpdate()
+{
+    return difftime(time(0), m_lastAutopilotFix);
+}
+
 
 int remembrancer_pi::GetAPIVersionMajor()
 {
@@ -137,36 +198,33 @@ wxString remembrancer_pi::GetLongDescription()
 
 void remembrancer_pi::OnContextMenuItemCallback(int id)
 {
-    printf("REMEMBRANCER: OnContextMenuItemCallback");
-      wxLogMessage(_T("remembrancer_pi OnContextMenuCallBack()"));
-     ::wxBell();
+    wxLogMessage(_T("REMEMBRANCER: OnContextMenuCallBack()"));
+    ::wxBell();
 
       //  Note carefully that this is a "reference to a wxAuiPaneInfo classs instance"
       //  Copy constructor (i.e. wxAuiPaneInfo pane = m_AUImgr->GetPane(m_pdemo_window);) will not work
 
-      wxAuiPaneInfo &pane = m_AUImgr->GetPane(m_alertWindow);
-      if(!pane.IsOk())
-            return;
+    wxAuiPaneInfo &pane = m_AUImgr->GetPane(m_alertWindow);
+    if(!pane.IsOk())
+        return;
 
-      if(!pane.IsShown())
-      {
-//            printf("show\n");
-            SetCanvasContextMenuItemViz(m_hide_id, true);
-            SetCanvasContextMenuItemViz(m_show_id, false);
+    if(!pane.IsShown())
+    {
+        SetCanvasContextMenuItemViz(m_hide_id, true);
+        SetCanvasContextMenuItemViz(m_show_id, false);
 
-            pane.Show(true);
-            m_AUImgr->Update();
+        pane.Show(true);
+        m_AUImgr->Update();
 
-      }
-      else
-      {
-//            printf("hide\n");
-            SetCanvasContextMenuItemViz(m_hide_id, false);
-            SetCanvasContextMenuItemViz(m_show_id, true);
+    }
+    else
+    {
+        SetCanvasContextMenuItemViz(m_hide_id, false);
+        SetCanvasContextMenuItemViz(m_show_id, true);
 
-            pane.Show(false);
-            m_AUImgr->Update();
-      }
+        pane.Show(false);
+        m_AUImgr->Update();
+    }
 }
 
 void remembrancer_pi::UpdateAuiStatus(void)
@@ -179,69 +237,41 @@ void remembrancer_pi::UpdateAuiStatus(void)
       //    We use this callback here to keep the context menu selection in sync with the window state
 
     printf("REMEMBRANCER: UpdateAuiStatus");
-      wxAuiPaneInfo &pane = m_AUImgr->GetPane(m_alertWindow);
-      if(!pane.IsOk())
-            return;
+    wxAuiPaneInfo &pane = m_AUImgr->GetPane(m_alertWindow);
+    if(!pane.IsOk())
+        return;
 
-      printf("update %d\n",pane.IsShown());
+    printf("update %d\n",pane.IsShown());
 
-      SetCanvasContextMenuItemViz(m_hide_id, pane.IsShown());
-      SetCanvasContextMenuItemViz(m_show_id, !pane.IsShown());
+    SetCanvasContextMenuItemViz(m_hide_id, pane.IsShown());
+    SetCanvasContextMenuItemViz(m_show_id, !pane.IsShown());
 
 }
 
 bool remembrancer_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)
 {
-  /*    if(m_pGribDialog && m_pGRIBOverlayFactory)
-      {
-            if(m_pGRIBOverlayFactory->IsReadyToRender())
-            {
-                  m_pGRIBOverlayFactory->RenderGribOverlay ( dc, vp );
-                  return true;
-            }
-            else
-                  return false;
-      }
-      else*/
-            return false;
+    return false;
 }
 void remembrancer_pi::SetCursorLatLon(double lat, double lon)
 {
-
 }
 bool remembrancer_pi::RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp)
 {
-   /*   if(m_pGribDialog && m_pGRIBOverlayFactory)
-      {
-            if(m_pGRIBOverlayFactory->IsReadyToRender())
-            {
-                  m_pGRIBOverlayFactory->RenderGLGribOverlay ( pcontext, vp );
-                  return true;
-            }
-            else
-                  return false;
-      }
-      else*/
-            return false;
-
+    return false;
 }
 int remembrancer_pi::GetToolbarToolCount(void)
 {
-      return 1;
+    return 1;
 }
 void remembrancer_pi::ShowPreferencesDialog( wxWindow* parent )
 {
-
 }
 void remembrancer_pi::OnToolbarToolCallback(int id)
 {
-
 }
 void remembrancer_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
 {
-
 }
 void remembrancer_pi::SetPositionFixEx(PlugIn_Position_Fix_Ex &pfix)
 {
-
 }
