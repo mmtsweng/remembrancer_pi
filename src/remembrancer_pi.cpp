@@ -10,11 +10,12 @@
 #include "time.h"
 #include "remembrancer_pi.h"
 #include "dialogDefinitions.h"
+#include "icons.h"
 
 // the class factories, used to create and destroy instances of the PlugIn
 extern "C" DECL_EXP opencpn_plugin* create_pi(void *ppimgr)
 {
-    return (opencpn_plugin *)new remembrancer_pi(ppimgr);
+    return new remembrancer_pi(ppimgr);
 }
 
 extern "C" DECL_EXP void destroy_pi(opencpn_plugin* p)
@@ -28,6 +29,20 @@ PropertyDialog  *m_propertiesWindow;
 wxWindow        *m_parent_window;
 wxAuiManager    *m_AUImgr;
 
+/*
+    Constructor
+        Initialize Images
+*/
+remembrancer_pi::remembrancer_pi(void *ppimgr)
+    : opencpn_plugin_19(ppimgr)
+{
+    initialize_images();
+}
+
+
+/*
+    Initialization
+*/
 int remembrancer_pi::Init(void)
 {
     // Get a pointer to the opencpn display canvas, to use as a parent for windows created
@@ -48,20 +63,26 @@ int remembrancer_pi::Init(void)
     m_hide_id = AddCanvasContextMenuItem(pmih, this );
     SetCanvasContextMenuItemViz(m_hide_id, false);
 
-    m_alertWindow = new AlertDialog(m_parent_window, wxID_ANY);
-
-    m_AUImgr = GetFrameAuiManager();
-    m_AUImgr->AddPane(m_alertWindow);
-    m_AUImgr->GetPane(m_alertWindow).CloseButton(true);
-    m_AUImgr->GetPane(m_alertWindow).Show(false);
-    m_AUImgr->Update();
-
     InitAutopilotStatus();
+
+    // This PlugIn needs a toolbar icon
+    try
+    {
+        m_toolbar_item_id  = InsertPlugInTool(_T(""), _img_remembrancer_active, _img_remembrancer_active, wxITEM_CHECK,
+            _("Remembrancer"), _T(""), NULL, REMEMBRANCER_TOOL_POSITION, 0, this);
+    }
+    catch(...)
+    {
+        wxLogMessage(_T("REMEMBRANCER: ERROR CREATING IMAGE"));
+    }
 
     return (
         INSTALLS_CONTEXTMENU_ITEMS     |
         WANTS_NMEA_SENTENCES           |
         WANTS_NMEA_EVENTS              |
+        WANTS_TOOLBAR_CALLBACK         |
+        INSTALLS_TOOLBAR_TOOL          |
+        INSTALLS_CONTEXTMENU_ITEMS     |
         USES_AUI_MANAGER
     );
 }
@@ -87,6 +108,15 @@ bool remembrancer_pi::DeInit(void)
 
     m_timer.Stop();
     m_timer.Disconnect(wxEVT_TIMER, wxTimerEventHandler(remembrancer_pi::OnTimer), NULL, this);
+
+    if (_img_remembrancer_active)
+    {
+        delete _img_remembrancer_active;
+    }
+    if (_img_remembrancer_inactive)
+    {
+        delete _img_remembrancer_inactive;
+    }
 
     return true;
 }
@@ -165,6 +195,14 @@ void remembrancer_pi::InitAutopilotStatus()
     //Start Timer
     m_timer.Connect(wxEVT_TIMER, wxTimerEventHandler(remembrancer_pi::OnTimer), NULL, this);
     m_timer.Start(10 * 1000);
+}
+
+/*
+    Method to return the bitmap for the toolbar
+*/
+wxBitmap *remembrancer_pi::GetPlugInBitmap()
+{
+      return _img_remembrancer_active;
 }
 
 int remembrancer_pi::GetAPIVersionMajor()

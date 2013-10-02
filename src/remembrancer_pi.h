@@ -10,10 +10,12 @@
 #endif //precompiled headers
 
 #define     PLUGIN_VERSION_MAJOR    0
-#define     PLUGIN_VERSION_MINOR    2
+#define     PLUGIN_VERSION_MINOR    3
 
 #define     MY_API_VERSION_MAJOR    1
 #define     MY_API_VERSION_MINOR    8
+
+#define     REMEMBRANCER_TOOL_POSITION    -1          // Request default positioning of toolbar tool
 
 #include "time.h"
 #include "../include/opencpn/ocpn_plugin.h"
@@ -23,13 +25,12 @@
 //----------------------------------------------------------------------------------------------------------
 //    The PlugIn Class Definition
 //----------------------------------------------------------------------------------------------------------
-class remembrancer_pi : public opencpn_plugin_18, wxEvtHandler
+class remembrancer_pi : public opencpn_plugin_19, wxEvtHandler
 {
 public:
     enum Alarm
     {ALERT_TIMER=1};
-
-    remembrancer_pi(void *ppimgr):opencpn_plugin_18(ppimgr){}
+    remembrancer_pi(void* ppimgr);
 
     //    The required PlugIn Methods
     int Init(void);
@@ -40,6 +41,7 @@ public:
     int GetPlugInVersionMajor();
     int GetPlugInVersionMinor();
 
+    wxBitmap *GetPlugInBitmap();
     wxString GetCommonName();
     wxString GetShortDescription();
     wxString GetLongDescription();
@@ -77,6 +79,8 @@ private:
     wxAuiManager    *m_AUImgr;
     int              m_show_id;
     int              m_hide_id;
+    int              m_toolbar_item_id;
+
 };
 #endif
 

@@ -61,7 +61,9 @@ FIND_PACKAGE(Gettext REQUIRED)
 # header files and cpp/c files and CMake will sort them out
 
 
-SET(SRC_DEMO
+SET(SRC_REMEMBRANCER
+    src/icons.h
+    src/icons.cpp
     src/dialogDefinitions.h
     src/dialogDefinitions.cpp
     src/remembrancer_pi.h
@@ -107,7 +109,7 @@ SET(SRC_NMEA0183
 	)
 INCLUDE_DIRECTORIES(nmea0183 opencpn)
 
-ADD_LIBRARY(${PACKAGE_NAME} SHARED ${SRC_DEMO} ${SRC_NMEA0183} )
+ADD_LIBRARY(${PACKAGE_NAME} SHARED ${SRC_REMEMBRANCER} ${SRC_NMEA0183} )
 
 IF(WIN32)
   SET(OPENCPN_IMPORT_LIB "../../../${CMAKE_CFG_INTDIR}/${PARENT}")
