@@ -10,7 +10,7 @@
 #endif //precompiled headers
 
 #define     PLUGIN_VERSION_MAJOR    0
-#define     PLUGIN_VERSION_MINOR    3
+#define     PLUGIN_VERSION_MINOR    4
 
 #define     MY_API_VERSION_MAJOR    1
 #define     MY_API_VERSION_MINOR    8
@@ -25,7 +25,7 @@
 //----------------------------------------------------------------------------------------------------------
 //    The PlugIn Class Definition
 //----------------------------------------------------------------------------------------------------------
-class remembrancer_pi : public opencpn_plugin_19, wxEvtHandler
+class remembrancer_pi : public opencpn_plugin_18, wxEvtHandler
 {
 public:
     enum Alarm

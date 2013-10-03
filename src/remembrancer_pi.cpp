@@ -34,9 +34,15 @@ wxAuiManager    *m_AUImgr;
         Initialize Images
 */
 remembrancer_pi::remembrancer_pi(void *ppimgr)
-    : opencpn_plugin_19(ppimgr)
+    : opencpn_plugin_18(ppimgr)
 {
-    initialize_images();
+    try
+    {
+        initialize_images();
+    }
+    catch(...)
+    {
+    }
 }
 
 
@@ -63,12 +69,20 @@ int remembrancer_pi::Init(void)
     m_hide_id = AddCanvasContextMenuItem(pmih, this );
     SetCanvasContextMenuItemViz(m_hide_id, false);
 
+    m_alertWindow = new AlertDialog(m_parent_window, wxID_ANY);
+
+    m_AUImgr = GetFrameAuiManager();
+    m_AUImgr->AddPane(m_alertWindow);
+    m_AUImgr->GetPane(m_alertWindow).CloseButton(true);
+    m_AUImgr->GetPane(m_alertWindow).Show(false);
+    m_AUImgr->Update();
+
     InitAutopilotStatus();
 
     // This PlugIn needs a toolbar icon
     try
     {
-        m_toolbar_item_id  = InsertPlugInTool(_T(""), _img_remembrancer_active, _img_remembrancer_active, wxITEM_CHECK,
+        m_toolbar_item_id  = InsertPlugInTool(_T(""), _img_remembrancer_inactive, _img_remembrancer_inactive, wxITEM_CHECK,
             _("Remembrancer"), _T(""), NULL, REMEMBRANCER_TOOL_POSITION, 0, this);
     }
     catch(...)
@@ -77,15 +91,20 @@ int remembrancer_pi::Init(void)
     }
 
     return (
+        WANTS_DYNAMIC_OPENGL_OVERLAY_CALLBACK |
         INSTALLS_CONTEXTMENU_ITEMS     |
         WANTS_NMEA_SENTENCES           |
         WANTS_NMEA_EVENTS              |
+        WANTS_CONFIG                   |
+        WANTS_PREFERENCES              |
         WANTS_TOOLBAR_CALLBACK         |
+        WANTS_OPENGL_OVERLAY_CALLBACK  |
         INSTALLS_TOOLBAR_TOOL          |
         INSTALLS_CONTEXTMENU_ITEMS     |
         USES_AUI_MANAGER
     );
 }
+
 
 /*
     DeInitialize the plugin
@@ -141,6 +160,10 @@ void remembrancer_pi::OnTimer(wxTimerEvent& event)
         wxLogMessage(message);
         mdlg.ShowModal();
     }
+    else
+    {
+        SetToolbarToolBitmaps(m_toolbar_item_id, _img_remembrancer_inactive, _img_remembrancer_inactive);
+    }
 }
 
 /*
@@ -164,6 +187,7 @@ void remembrancer_pi::SetNMEASentence(wxString &sentence)
                     //wxLogMessage(msg);
 
                     time(&m_lastAutopilotFix);
+                    SetToolbarToolBitmaps(m_toolbar_item_id, _img_remembrancer_active, _img_remembrancer_active);
                 }
             }
         }

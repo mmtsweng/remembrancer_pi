@@ -62,12 +62,12 @@ FIND_PACKAGE(Gettext REQUIRED)
 
 
 SET(SRC_REMEMBRANCER
-    src/icons.h
-    src/icons.cpp
-    src/dialogDefinitions.h
-    src/dialogDefinitions.cpp
-    src/remembrancer_pi.h
     src/remembrancer_pi.cpp
+    src/remembrancer_pi.h
+    src/dialogDefinitions.cpp
+    src/dialogDefinitions.h
+    src/icons.cpp
+    src/icons.h
  	)
 
 SET(SRC_NMEA0183
