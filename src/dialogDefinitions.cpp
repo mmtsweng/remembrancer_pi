@@ -21,7 +21,7 @@ AlertDialog::AlertDialog( wxWindow* parent, wxWindowID id, const wxString& title
 	
 	fgSizerPanel->SetMinSize( wxSize( 0,0 ) ); 
 	m_staticNotification = new wxStaticText( this, wxID_ANY, wxT("This is an alert  to remind you to do a safety sweep and make sure the vessel is traveling as expected."), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticNotification->Wrap( -1 );
+	m_staticNotification->Wrap( 200 );
 	fgSizerPanel->Add( m_staticNotification, 0, wxALL, 5 );
 	
 	wxBoxSizer* bSizerButton;
@@ -31,8 +31,8 @@ AlertDialog::AlertDialog( wxWindow* parent, wxWindowID id, const wxString& title
 	m_buttonCloseAlert->SetDefault(); 
 	bSizerButton->Add( m_buttonCloseAlert, 0, wxALL, 5 );
 	
-	m_buttonStopAlerting = new wxButton( this, wxID_ANY, wxT("Stop Alerting"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizerButton->Add( m_buttonStopAlerting, 0, wxALL, 5 );
+	m_btnOptions = new wxButton( this, wxID_ANY, wxT("Options"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizerButton->Add( m_btnOptions, 0, wxALL, 5 );
 	
 	
 	fgSizerPanel->Add( bSizerButton, 1, wxEXPAND, 5 );
@@ -43,10 +43,18 @@ AlertDialog::AlertDialog( wxWindow* parent, wxWindowID id, const wxString& title
 	fgSizerPanel->Fit( this );
 	
 	this->Centre( wxBOTH );
+	
+	// Connect Events
+	m_buttonCloseAlert->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AlertDialog::OnClose ), NULL, this );
+	m_btnOptions->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AlertDialog::OnProperties ), NULL, this );
 }
 
 AlertDialog::~AlertDialog()
 {
+	// Disconnect Events
+	m_buttonCloseAlert->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AlertDialog::OnClose ), NULL, this );
+	m_btnOptions->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AlertDialog::OnProperties ), NULL, this );
+	
 }
 
 PropertyDialog::PropertyDialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
@@ -56,9 +64,28 @@ PropertyDialog::PropertyDialog( wxWindow* parent, wxWindowID id, const wxString&
 	wxBoxSizer* bSizer2;
 	bSizer2 = new wxBoxSizer( wxVERTICAL );
 	
+	wxBoxSizer* bSizer5;
+	bSizer5 = new wxBoxSizer( wxVERTICAL );
+	
+	wxBoxSizer* bSizer6;
+	bSizer6 = new wxBoxSizer( wxHORIZONTAL );
+	
+	m_lblDelay = new wxStaticText( this, wxID_ANY, wxT("Delay (Seconds)"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_lblDelay->Wrap( -1 );
+	bSizer6->Add( m_lblDelay, 0, wxALL, 5 );
+	
+	m_txtDelay = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer6->Add( m_txtDelay, 0, wxALL, 5 );
+	
+	
+	bSizer5->Add( bSizer6, 1, wxEXPAND, 5 );
+	
 	m_ckEnabled = new wxCheckBox( this, wxID_ANY, wxT("Enabled"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_ckEnabled->SetValue(true); 
-	bSizer2->Add( m_ckEnabled, 0, wxALL, 5 );
+	bSizer5->Add( m_ckEnabled, 0, wxALL, 5 );
+	
+	
+	bSizer2->Add( bSizer5, 1, wxEXPAND, 5 );
 	
 	wxBoxSizer* bSizer3;
 	bSizer3 = new wxBoxSizer( wxHORIZONTAL );
@@ -73,29 +100,33 @@ PropertyDialog::PropertyDialog( wxWindow* parent, wxWindowID id, const wxString&
 	
 	bSizer2->Add( bSizer3, 1, wxEXPAND, 5 );
 	
-	wxBoxSizer* bSizer5;
-	bSizer5 = new wxBoxSizer( wxHORIZONTAL );
+	wxBoxSizer* bSizer7;
+	bSizer7 = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_lblNMEASentance = new wxStaticText( this, wxID_ANY, wxT("NMEA Sentance"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_lblNMEASentance->Wrap( -1 );
-	bSizer5->Add( m_lblNMEASentance, 0, wxALL, 5 );
+	m_btnCancel = new wxButton( this, wxID_ANY, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer7->Add( m_btnCancel, 0, wxALL, 5 );
 	
-	wxString m_cboNMEAChoices[] = { wxT("$ECAPB"), wxT("$ECRMB"), wxT("$ECRMC") };
-	int m_cboNMEANChoices = sizeof( m_cboNMEAChoices ) / sizeof( wxString );
-	m_cboNMEA = new wxChoice( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_cboNMEANChoices, m_cboNMEAChoices, 0 );
-	m_cboNMEA->SetSelection( 0 );
-	bSizer5->Add( m_cboNMEA, 0, wxALL, 5 );
+	m_btnOk = new wxButton( this, wxID_ANY, wxT("Ok"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer7->Add( m_btnOk, 0, wxALL, 5 );
 	
 	
-	bSizer2->Add( bSizer5, 1, wxEXPAND, 5 );
+	bSizer2->Add( bSizer7, 1, wxEXPAND, 5 );
 	
 	
 	this->SetSizer( bSizer2 );
 	this->Layout();
 	
 	this->Centre( wxBOTH );
+	
+	// Connect Events
+	m_btnCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertyDialog::OnCancel ), NULL, this );
+	m_btnOk->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertyDialog::OnOK ), NULL, this );
 }
 
 PropertyDialog::~PropertyDialog()
 {
+	// Disconnect Events
+	m_btnCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertyDialog::OnCancel ), NULL, this );
+	m_btnOk->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertyDialog::OnOK ), NULL, this );
+	
 }

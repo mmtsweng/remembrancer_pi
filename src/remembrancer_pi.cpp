@@ -79,6 +79,7 @@ int remembrancer_pi::Init(void)
 
     m_activeRoute = true;
     m_alertingEnabled = true;
+    m_reminderDelaySeconds = 60; //By default alert every minute
 
     InitReminder();
 
@@ -184,7 +185,7 @@ void remembrancer_pi::InitReminder()
 {
     //Start Timer
     m_timer.Connect(wxEVT_TIMER, wxTimerEventHandler(remembrancer_pi::OnTimer), NULL, this);
-    m_timer.Start(10 * 1000);
+    m_timer.Start(m_reminderDelaySeconds * 1000);
 }
 
 /*

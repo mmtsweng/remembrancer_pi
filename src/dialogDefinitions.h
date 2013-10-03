@@ -19,9 +19,9 @@
 #include <wx/button.h>
 #include <wx/sizer.h>
 #include <wx/dialog.h>
+#include <wx/textctrl.h>
 #include <wx/checkbox.h>
 #include <wx/filepicker.h>
-#include <wx/choice.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -36,11 +36,16 @@ class AlertDialog : public wxDialog
 	protected:
 		wxStaticText* m_staticNotification;
 		wxButton* m_buttonCloseAlert;
-		wxButton* m_buttonStopAlerting;
+		wxButton* m_btnOptions;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnClose( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnProperties( wxCommandEvent& event ) { event.Skip(); }
+		
 	
 	public:
 		
-		AlertDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Alert"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER ); 
+		AlertDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Alert"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE ); 
 		~AlertDialog();
 	
 };
@@ -53,15 +58,22 @@ class PropertyDialog : public wxDialog
 	private:
 	
 	protected:
+		wxStaticText* m_lblDelay;
+		wxTextCtrl* m_txtDelay;
 		wxCheckBox* m_ckEnabled;
 		wxStaticText* m_lblSoundFile;
 		wxFilePickerCtrl* m_fipSoundFile;
-		wxStaticText* m_lblNMEASentance;
-		wxChoice* m_cboNMEA;
+		wxButton* m_btnCancel;
+		wxButton* m_btnOk;
+		
+		// Virtual event handlers, overide them in your derived class
+		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnOK( wxCommandEvent& event ) { event.Skip(); }
+		
 	
 	public:
 		
-		PropertyDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Properties"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 300,150 ), long style = wxDEFAULT_DIALOG_STYLE ); 
+		PropertyDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Properties"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 300,220 ), long style = wxDEFAULT_DIALOG_STYLE ); 
 		~PropertyDialog();
 	
 };

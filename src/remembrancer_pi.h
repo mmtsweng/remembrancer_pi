@@ -78,6 +78,7 @@ private:
     int              m_show_id;
     int              m_hide_id;
     int              m_toolbar_item_id;
+    int              m_reminderDelaySeconds;
 
 };
 #endif
