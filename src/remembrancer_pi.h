@@ -74,6 +74,8 @@ private:
     NMEA0183         m_NMEA;
     wxTimer          m_timer;
     time_t           m_lastAutopilotFix;
+    bool             m_alertingEnabled;
+    bool             m_activeRoute;
 
     wxWindow        *m_parent_window;
     wxAuiManager    *m_AUImgr;

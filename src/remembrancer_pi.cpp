@@ -77,26 +77,21 @@ int remembrancer_pi::Init(void)
     m_AUImgr->GetPane(m_alertWindow).Show(false);
     m_AUImgr->Update();
 
+    m_activeRoute = true;
+    m_alertingEnabled = true;
+
     InitAutopilotStatus();
 
     // This PlugIn needs a toolbar icon
-    try
-    {
-        m_toolbar_item_id  = InsertPlugInTool(_T(""), _img_remembrancer_inactive, _img_remembrancer_inactive, wxITEM_CHECK,
-            _("Remembrancer"), _T(""), NULL, REMEMBRANCER_TOOL_POSITION, 0, this);
-    }
-    catch(...)
-    {
-        wxLogMessage(_T("REMEMBRANCER: ERROR CREATING IMAGE"));
-    }
+    m_toolbar_item_id  = InsertPlugInTool(_T(""), _img_remembrancer_inactive, _img_remembrancer_inactive, wxITEM_CHECK,
+        _("Remembrancer"), _T(""), NULL, REMEMBRANCER_TOOL_POSITION, 0, this);
 
     return (
-        WANTS_DYNAMIC_OPENGL_OVERLAY_CALLBACK |
         INSTALLS_CONTEXTMENU_ITEMS     |
         WANTS_NMEA_SENTENCES           |
         WANTS_NMEA_EVENTS              |
+        WANTS_PLUGIN_MESSAGING         |
         WANTS_CONFIG                   |
-        WANTS_PREFERENCES              |
         WANTS_TOOLBAR_CALLBACK         |
         WANTS_OPENGL_OVERLAY_CALLBACK  |
         INSTALLS_TOOLBAR_TOOL          |
@@ -152,17 +147,11 @@ void remembrancer_pi::OnTimer(wxTimerEvent& event)
     //msg.Printf(wxT("REMEMBRANCER: %.0f Seconds since Autopilot:"), secondsPassed);
     //wxLogMessage(msg);
 
-    if (secondsPassed >=0 && secondsPassed < 2)
+    if (m_activeRoute && m_alertingEnabled)
     {
-        wxString message;
-        message.Printf(wxT("%.0f seconds passed. Alarm!!!!"), secondsPassed);
-        wxMessageDialog mdlg(m_parent_window, message,_("Watchman"), wxOK | wxICON_ERROR);
-        wxLogMessage(message);
+        wxMessageDialog mdlg(m_parent_window, _("Reminder!"), _("Watchman"), wxOK | wxICON_ERROR);
+        wxLogMessage(_T("REMEMBRANCER: Alert fired"));
         mdlg.ShowModal();
-    }
-    else
-    {
-        SetToolbarToolBitmaps(m_toolbar_item_id, _img_remembrancer_inactive, _img_remembrancer_inactive);
     }
 }
 
@@ -187,10 +176,31 @@ void remembrancer_pi::SetNMEASentence(wxString &sentence)
                     //wxLogMessage(msg);
 
                     time(&m_lastAutopilotFix);
-                    SetToolbarToolBitmaps(m_toolbar_item_id, _img_remembrancer_active, _img_remembrancer_active);
                 }
             }
         }
+    }
+}
+
+/*
+    JSON Message received handler
+        - Listens for route activation and deactivation
+*/
+void remembrancer_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
+{
+    //wxLogMessage(_T("REMEMBRANCER: JSON Message Received...\n") + message_body);
+    if (message_id == _T("OCPN_RTE_ACTIVATED"))
+    {
+        wxLogMessage(_T("REMEMBRANCER: ACTIVATED"));
+        m_activeRoute = true;
+        SetToolbarToolBitmaps(m_toolbar_item_id, _img_remembrancer_active, _img_remembrancer_active);
+    }
+
+    if (message_id == _T("OCPN_RTE_DEACTIVATED"))
+    {
+        wxLogMessage(_T("REMEMBRANCER: DEACTIVATED"));
+        m_activeRoute = false;
+        SetToolbarToolBitmaps(m_toolbar_item_id, _img_remembrancer_inactive, _img_remembrancer_inactive);
     }
 }
 
@@ -226,7 +236,7 @@ void remembrancer_pi::InitAutopilotStatus()
 */
 wxBitmap *remembrancer_pi::GetPlugInBitmap()
 {
-      return _img_remembrancer_active;
+      return _img_remembrancer_inactive;
 }
 
 int remembrancer_pi::GetAPIVersionMajor()
@@ -337,9 +347,6 @@ void remembrancer_pi::ShowPreferencesDialog( wxWindow* parent )
 {
 }
 void remembrancer_pi::OnToolbarToolCallback(int id)
-{
-}
-void remembrancer_pi::SetPluginMessage(wxString &message_id, wxString &message_body)
 {
 }
 void remembrancer_pi::SetPositionFixEx(PlugIn_Position_Fix_Ex &pfix)
