@@ -80,7 +80,7 @@ int remembrancer_pi::Init(void)
     m_activeRoute = true;
     m_alertingEnabled = true;
 
-    InitAutopilotStatus();
+    InitReminder();
 
     // This PlugIn needs a toolbar icon
     m_toolbar_item_id  = InsertPlugInTool(_T(""), _img_remembrancer_inactive, _img_remembrancer_inactive, wxITEM_CHECK,
@@ -88,8 +88,6 @@ int remembrancer_pi::Init(void)
 
     return (
         INSTALLS_CONTEXTMENU_ITEMS     |
-        WANTS_NMEA_SENTENCES           |
-        WANTS_NMEA_EVENTS              |
         WANTS_PLUGIN_MESSAGING         |
         WANTS_CONFIG                   |
         WANTS_TOOLBAR_CALLBACK         |
@@ -99,7 +97,6 @@ int remembrancer_pi::Init(void)
         USES_AUI_MANAGER
     );
 }
-
 
 /*
     DeInitialize the plugin
@@ -142,7 +139,6 @@ bool remembrancer_pi::DeInit(void)
 */
 void remembrancer_pi::OnTimer(wxTimerEvent& event)
 {
-    double secondsPassed = difftime(time(0), m_lastAutopilotFix);
     //wxString msg;
     //msg.Printf(wxT("REMEMBRANCER: %.0f Seconds since Autopilot:"), secondsPassed);
     //wxLogMessage(msg);
@@ -155,32 +151,6 @@ void remembrancer_pi::OnTimer(wxTimerEvent& event)
     }
 }
 
-/*
-    NMEA Sentance Event
-        Called by OpenCPN
-        Checks for selected Autopilot NMEA sentances, and saves time received
-*/
-void remembrancer_pi::SetNMEASentence(wxString &sentence)
-{
-    m_NMEA << sentence;
-
-    if(m_NMEA.PreParse())
-    {
-        if(m_NMEA.LastSentenceIDReceived == _T("RMC"))
-        {
-            if(m_NMEA.Parse())
-            {
-                if(m_NMEA.Rmc.IsDataValid == NTrue)
-                {
-                    //wxString msg(_T("REMEMBRANCER: RMB Messasge Parsed!"));
-                    //wxLogMessage(msg);
-
-                    time(&m_lastAutopilotFix);
-                }
-            }
-        }
-    }
-}
 
 /*
     JSON Message received handler
@@ -204,28 +174,14 @@ void remembrancer_pi::SetPluginMessage(wxString &message_id, wxString &message_b
     }
 }
 
-/*
-    Number of seconds elapsed since the last Autopilot NMEA Message was received
-*/
-double remembrancer_pi::SecondsSinceAutopilotUpdate()
-{
-    return difftime(time(0), m_lastAutopilotFix);
-}
 
 /*
     InitAutopilotStatus
         Make sure alerts don't show up until autopilot NMEA messages are parsed
         Start reminder-check timer
 */
-void remembrancer_pi::InitAutopilotStatus()
+void remembrancer_pi::InitReminder()
 {
-    //Last fix a long time ago. :-)
-    struct tm initTime;
-    time_t now;
-    initTime = *localtime(&now);
-    initTime.tm_hour = initTime.tm_hour-12;
-    m_lastAutopilotFix = mktime(&initTime);
-
     //Start Timer
     m_timer.Connect(wxEVT_TIMER, wxTimerEventHandler(remembrancer_pi::OnTimer), NULL, this);
     m_timer.Start(10 * 1000);

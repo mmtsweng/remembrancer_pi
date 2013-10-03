@@ -47,7 +47,6 @@ public:
     wxString GetLongDescription();
 
     //    The optional method overrides
-    void SetNMEASentence(wxString &sentence);
     void OnContextMenuItemCallback(int id);
     void UpdateAuiStatus(void);
     void OnTimer(wxTimerEvent& event);
@@ -65,15 +64,12 @@ public:
 
 private:
     //Private Methods
-    double SecondsSinceAutopilotUpdate();
-    void InitAutopilotStatus();
+    void InitReminder();
 
     // UI Windows
     PropertyDialog  *m_propertiesWindow;
     AlertDialog     *m_alertWindow;
-    NMEA0183         m_NMEA;
     wxTimer          m_timer;
-    time_t           m_lastAutopilotFix;
     bool             m_alertingEnabled;
     bool             m_activeRoute;
 
