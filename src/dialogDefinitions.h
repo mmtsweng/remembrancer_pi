@@ -27,9 +27,9 @@
 
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class AlertDialog
+/// Class AlertDialogBase
 ///////////////////////////////////////////////////////////////////////////////
-class AlertDialog : public wxDialog 
+class AlertDialogBase : public wxDialog 
 {
 	private:
 	
@@ -45,15 +45,15 @@ class AlertDialog : public wxDialog
 	
 	public:
 		
-		AlertDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Alert"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE ); 
-		~AlertDialog();
+		AlertDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Alert"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize, long style = wxDEFAULT_DIALOG_STYLE ); 
+		~AlertDialogBase();
 	
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class PropertyDialog
+/// Class PropertyDialogBase
 ///////////////////////////////////////////////////////////////////////////////
-class PropertyDialog : public wxDialog 
+class PropertyDialogBase : public wxDialog 
 {
 	private:
 	
@@ -73,8 +73,8 @@ class PropertyDialog : public wxDialog
 	
 	public:
 		
-		PropertyDialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Properties"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 300,220 ), long style = wxDEFAULT_DIALOG_STYLE ); 
-		~PropertyDialog();
+		PropertyDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Properties"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 300,220 ), long style = wxDEFAULT_DIALOG_STYLE ); 
+		~PropertyDialogBase();
 	
 };
 
