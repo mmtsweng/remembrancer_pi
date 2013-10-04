@@ -20,7 +20,8 @@
 #include "time.h"
 #include "../include/opencpn/ocpn_plugin.h"
 #include "../include/nmea0183/nmea0183.h"
-#include "dialogDefinitions.h"
+#include "alertdialog.h"
+#include "propertydialog.h"
 
 //----------------------------------------------------------------------------------------------------------
 //    The PlugIn Class Definition

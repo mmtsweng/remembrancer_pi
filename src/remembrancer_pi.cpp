@@ -69,17 +69,10 @@ int remembrancer_pi::Init(void)
     m_hide_id = AddCanvasContextMenuItem(pmih, this );
     SetCanvasContextMenuItemViz(m_hide_id, false);
 
-    m_alertWindow = new AlertDialog(m_parent_window, wxID_ANY);
-
-    m_AUImgr = GetFrameAuiManager();
-    m_AUImgr->AddPane(m_alertWindow);
-    m_AUImgr->GetPane(m_alertWindow).CloseButton(true);
-    m_AUImgr->GetPane(m_alertWindow).Show(false);
-    m_AUImgr->Update();
-
-    m_activeRoute = true;
+    m_alertWindow = NULL;
+    m_activeRoute = false;
     m_alertingEnabled = true;
-    m_reminderDelaySeconds = 60; //By default alert every minute
+    m_reminderDelaySeconds = 10; //By default alert every minute
 
     InitReminder();
 
@@ -94,8 +87,7 @@ int remembrancer_pi::Init(void)
         WANTS_TOOLBAR_CALLBACK         |
         WANTS_OPENGL_OVERLAY_CALLBACK  |
         INSTALLS_TOOLBAR_TOOL          |
-        INSTALLS_CONTEXTMENU_ITEMS     |
-        USES_AUI_MANAGER
+        INSTALLS_CONTEXTMENU_ITEMS
     );
 }
 
@@ -146,9 +138,13 @@ void remembrancer_pi::OnTimer(wxTimerEvent& event)
 
     if (m_activeRoute && m_alertingEnabled)
     {
-        wxMessageDialog mdlg(m_parent_window, _("Reminder!"), _("Watchman"), wxOK | wxICON_ERROR);
         wxLogMessage(_T("REMEMBRANCER: Alert fired"));
-        mdlg.ShowModal();
+
+        if (!m_alertWindow)
+        {
+            m_alertWindow = new AlertDialog(*this, m_parent_window);
+        }
+        m_alertWindow->Show(true);
     }
 }
 

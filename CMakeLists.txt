@@ -68,6 +68,10 @@ SET(SRC_REMEMBRANCER
     src/dialogDefinitions.h
     src/icons.cpp
     src/icons.h
+    src/alertdialog.cpp
+    src/alertdialog.h
+    src/propertydialog.cpp
+    src/propertydialog.h
  	)
 
 SET(SRC_NMEA0183
