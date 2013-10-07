@@ -27,7 +27,7 @@ AlertDialogBase::AlertDialogBase( wxWindow* parent, wxWindowID id, const wxStrin
 	wxBoxSizer* bSizerButton;
 	bSizerButton = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_buttonCloseAlert = new wxButton( this, wxID_ANY, wxT("Close"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_buttonCloseAlert = new wxButton( this, wxID_OK, wxT("Close"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_buttonCloseAlert->SetDefault(); 
 	bSizerButton->Add( m_buttonCloseAlert, 0, wxALL, 5 );
 	
@@ -45,14 +45,12 @@ AlertDialogBase::AlertDialogBase( wxWindow* parent, wxWindowID id, const wxStrin
 	this->Centre( wxBOTH );
 	
 	// Connect Events
-	m_buttonCloseAlert->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AlertDialogBase::OnClose ), NULL, this );
 	m_btnOptions->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AlertDialogBase::OnProperties ), NULL, this );
 }
 
 AlertDialogBase::~AlertDialogBase()
 {
 	// Disconnect Events
-	m_buttonCloseAlert->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AlertDialogBase::OnClose ), NULL, this );
 	m_btnOptions->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AlertDialogBase::OnProperties ), NULL, this );
 	
 }
@@ -103,11 +101,11 @@ PropertyDialogBase::PropertyDialogBase( wxWindow* parent, wxWindowID id, const w
 	wxBoxSizer* bSizer7;
 	bSizer7 = new wxBoxSizer( wxHORIZONTAL );
 	
-	m_btnCancel = new wxButton( this, wxID_ANY, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer7->Add( m_btnCancel, 0, wxALL, 5 );
+	m_btnSave = new wxButton( this, wxID_OK, wxT("Save"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer7->Add( m_btnSave, 0, wxALL, 5 );
 	
-	m_btnOk = new wxButton( this, wxID_ANY, wxT("Ok"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer7->Add( m_btnOk, 0, wxALL, 5 );
+	m_btnCancel = new wxButton( this, wxID_Cancel, wxT("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer7->Add( m_btnCancel, 0, wxALL, 5 );
 	
 	
 	bSizer2->Add( bSizer7, 1, wxEXPAND, 5 );
@@ -119,14 +117,14 @@ PropertyDialogBase::PropertyDialogBase( wxWindow* parent, wxWindowID id, const w
 	this->Centre( wxBOTH );
 	
 	// Connect Events
+	m_btnSave->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertyDialogBase::OnSave ), NULL, this );
 	m_btnCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertyDialogBase::OnCancel ), NULL, this );
-	m_btnOk->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertyDialogBase::OnOK ), NULL, this );
 }
 
 PropertyDialogBase::~PropertyDialogBase()
 {
 	// Disconnect Events
+	m_btnSave->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertyDialogBase::OnSave ), NULL, this );
 	m_btnCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertyDialogBase::OnCancel ), NULL, this );
-	m_btnOk->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertyDialogBase::OnOK ), NULL, this );
 	
 }

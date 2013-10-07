@@ -10,7 +10,7 @@
 #endif //precompiled headers
 
 #define     PLUGIN_VERSION_MAJOR    0
-#define     PLUGIN_VERSION_MINOR    4
+#define     PLUGIN_VERSION_MINOR    5
 
 #define     MY_API_VERSION_MAJOR    1
 #define     MY_API_VERSION_MINOR    8
@@ -61,25 +61,31 @@ public:
     void OnToolbarToolCallback(int id);
     void SetPluginMessage(wxString &message_id, wxString &message_body);
     void SetPositionFixEx(PlugIn_Position_Fix_Ex &pfix);
+    bool LoadConfig(void);
+    bool SaveConfig(void);
 
 
 private:
     //Private Methods
     void InitReminder();
+    void ResetToolbarIcon();
 
     // UI Windows
-    PropertyDialog  *m_propertiesWindow;
-    AlertDialog     *m_alertWindow;
+    PropertyDialog   *m_propertiesWindow;
+    AlertDialog      *m_alertWindow;
     wxTimer          m_timer;
+    int              m_reminderDelaySeconds;
+    wxString         m_alertFileWav;
+    bool             m_alertPlaySound;
     bool             m_alertingEnabled;
     bool             m_activeRoute;
 
-    wxWindow        *m_parent_window;
-    wxAuiManager    *m_AUImgr;
+    wxWindow         *m_parent_window;
+    wxAuiManager     *m_AUImgr;
+    wxFileConfig     *m_pconfig;
     int              m_show_id;
     int              m_hide_id;
     int              m_toolbar_item_id;
-    int              m_reminderDelaySeconds;
 
 };
 #endif

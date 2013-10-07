@@ -1,6 +1,7 @@
 
 #include "wx/wxprec.h"
 #include "wx/timer.h"
+#include "wx/fileconf.h"
 
 #ifndef  WX_PRECOMP
 #include "wx/wx.h"
@@ -28,6 +29,8 @@ AlertDialog     *m_alertWindow;
 PropertyDialog  *m_propertiesWindow;
 wxWindow        *m_parent_window;
 wxAuiManager    *m_AUImgr;
+wxString         m_alertFileWav;
+bool             m_alertPlaySound;
 
 /*
     Constructor
@@ -70,9 +73,9 @@ int remembrancer_pi::Init(void)
     SetCanvasContextMenuItemViz(m_hide_id, false);
 
     m_alertWindow = NULL;
+    m_propertiesWindow = NULL;
     m_activeRoute = false;
-    m_alertingEnabled = true;
-    m_reminderDelaySeconds = 10; //By default alert every minute
+    LoadConfig();
 
     InitReminder();
 
@@ -83,6 +86,7 @@ int remembrancer_pi::Init(void)
     return (
         INSTALLS_CONTEXTMENU_ITEMS     |
         WANTS_PLUGIN_MESSAGING         |
+        WANTS_PREFERENCES              |
         WANTS_CONFIG                   |
         WANTS_TOOLBAR_CALLBACK         |
         WANTS_OPENGL_OVERLAY_CALLBACK  |
@@ -90,6 +94,7 @@ int remembrancer_pi::Init(void)
         INSTALLS_CONTEXTMENU_ITEMS
     );
 }
+
 
 /*
     DeInitialize the plugin
@@ -124,6 +129,7 @@ bool remembrancer_pi::DeInit(void)
 
     return true;
 }
+
 
 /*
     Timer Event
@@ -184,6 +190,7 @@ void remembrancer_pi::InitReminder()
     m_timer.Start(m_reminderDelaySeconds * 1000);
 }
 
+
 /*
     Method to return the bitmap for the toolbar
 */
@@ -191,6 +198,53 @@ wxBitmap *remembrancer_pi::GetPlugInBitmap()
 {
       return _img_remembrancer_inactive;
 }
+
+
+/*
+    Show Preferences
+*/
+void remembrancer_pi::OnToolbarToolCallback(int id)
+{
+    wxLogMessage(_T("REMEMBRANCER: Property Dialog Show"));
+    if (!m_propertiesWindow)
+    {
+        m_propertiesWindow = new PropertyDialog(*this, m_parent_window);
+    }
+    m_propertiesWindow->Show(true);
+}
+
+
+/*
+    Load Configuration Settings
+*/
+bool remembrancer_pi::LoadConfig(void)
+{
+    return true;
+    wxFileConfig *pConf = m_pconfig;
+
+    if(!pConf)
+    {
+        return false;
+    }
+    pConf->SetPath ( _T( "/Settings/Remembrancer" ) );
+
+    m_alertingEnabled = true;
+    m_alertPlaySound = false;
+    m_reminderDelaySeconds = 10; //By default alert every minute
+
+    return true;
+}
+
+bool remembrancer_pi::SaveConfig(void)
+{
+    return true;
+}
+
+void remembrancer_pi::ResetToolbarIcon()
+{
+    RequestRefresh(m_parent_window);
+}
+
 
 int remembrancer_pi::GetAPIVersionMajor()
 {
@@ -227,7 +281,6 @@ wxString remembrancer_pi::GetLongDescription()
       return _("Remembrancer PlugIn for OpenCPN\n\rPlugIn processing of NMEA messages and displaying an alert if the autopilot is engaged.");
 
 }
-
 
 void remembrancer_pi::OnContextMenuItemCallback(int id)
 {
@@ -285,23 +338,26 @@ bool remembrancer_pi::RenderOverlay(wxDC &dc, PlugIn_ViewPort *vp)
 {
     return false;
 }
+
 void remembrancer_pi::SetCursorLatLon(double lat, double lon)
 {
 }
+
 bool remembrancer_pi::RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp)
 {
     return false;
 }
+
 int remembrancer_pi::GetToolbarToolCount(void)
 {
     return 1;
 }
+
 void remembrancer_pi::ShowPreferencesDialog( wxWindow* parent )
 {
+
 }
-void remembrancer_pi::OnToolbarToolCallback(int id)
-{
-}
+
 void remembrancer_pi::SetPositionFixEx(PlugIn_Position_Fix_Ex &pfix)
 {
 }

@@ -12,6 +12,9 @@ class PropertyDialog : public PropertyDialogBase
         virtual ~PropertyDialog();
     protected:
         remembrancer_pi &m_remembrancer_pi;
+        void OnSave(wxCommandEvent &event);
+		void OnCancel(wxCommandEvent &event);
+
     private:
 };
 

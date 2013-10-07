@@ -25,6 +25,7 @@
 
 ///////////////////////////////////////////////////////////////////////////
 
+#define wxID_Cancel 1000
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class AlertDialogBase
@@ -39,7 +40,6 @@ class AlertDialogBase : public wxDialog
 		wxButton* m_btnOptions;
 		
 		// Virtual event handlers, overide them in your derived class
-		virtual void OnClose( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnProperties( wxCommandEvent& event ) { event.Skip(); }
 		
 	
@@ -63,12 +63,12 @@ class PropertyDialogBase : public wxDialog
 		wxCheckBox* m_ckEnabled;
 		wxStaticText* m_lblSoundFile;
 		wxFilePickerCtrl* m_fipSoundFile;
+		wxButton* m_btnSave;
 		wxButton* m_btnCancel;
-		wxButton* m_btnOk;
 		
 		// Virtual event handlers, overide them in your derived class
+		virtual void OnSave( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnOK( wxCommandEvent& event ) { event.Skip(); }
 		
 	
 	public:
