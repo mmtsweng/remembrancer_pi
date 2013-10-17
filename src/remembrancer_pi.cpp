@@ -220,27 +220,31 @@ wxBitmap *remembrancer_pi::GetPlugInBitmap()
 */
 void remembrancer_pi::OnToolbarToolCallback(int id)
 {
-    SetToolbarItemState(m_toolbar_item_id, false);
-
+    wxLogMessage(_T("REMEMBRANCER: ToolbarCallback"));
     if (!m_propertiesWindow)
     {
+        wxLogMessage(_T("REMEMBRANCER: Create Properties Window"));
         m_propertiesWindow = new PropertyDialog(*this, m_parent_window);
         m_propertiesWindow->m_txtDelay->SetValue(wxString::Format(_T("%d"), m_reminderDelaySeconds));
         m_propertiesWindow->m_fipSoundFile->SetPath(m_alertFileWav);
         m_propertiesWindow->m_ckEnabled->SetValue(m_alertingEnabled);
-
-        if (m_propertiesWindow->ShowModal() == wxID_OK)
-        {
-            m_alertFileWav = m_propertiesWindow->m_fipSoundFile->GetPath();
-            m_alertingEnabled = m_propertiesWindow->m_ckEnabled->GetValue();
-            m_reminderDelaySeconds = wxAtoi(m_propertiesWindow->m_txtDelay->GetValue());
-            SaveConfig();
-            m_propertiesWindow->Close();
-
-            //Restart Timer with new settings
-            InitReminder();
-        }
     }
+
+    wxLogMessage(_T("REMEMBRANCER: Show Properties Window"));
+    if (m_propertiesWindow->ShowModal() == wxID_OK)
+    {
+        wxLogMessage(_T("REMEMBRANCER: Get Properties Window Values"));
+        m_alertFileWav = m_propertiesWindow->m_fipSoundFile->GetPath();
+        m_alertingEnabled = m_propertiesWindow->m_ckEnabled->GetValue();
+        m_reminderDelaySeconds = wxAtoi(m_propertiesWindow->m_txtDelay->GetValue());
+        SaveConfig();
+        m_propertiesWindow->Close();
+
+        //Restart Timer with new settings
+        InitReminder();
+    }
+
+    SetToolbarItemState(m_toolbar_item_id, false);
 }
 
 
@@ -278,7 +282,7 @@ bool remembrancer_pi::SaveConfig(void)
         pConf->Write ( _T ( "SoundFile" ), m_alertFileWav );
 
         //Automatically write changes
-        delete pConf;
+        pConf->Flush();
 
         return true;
     }
