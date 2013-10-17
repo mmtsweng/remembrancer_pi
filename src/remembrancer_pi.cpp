@@ -142,13 +142,9 @@ bool remembrancer_pi::DeInit(void)
 */
 void remembrancer_pi::OnTimer(wxTimerEvent& event)
 {
-    //wxString msg;
-    //msg.Printf(wxT("REMEMBRANCER: %.0f Seconds since Autopilot:"), secondsPassed);
-    //wxLogMessage(msg);
-
     if (m_activeRoute && m_alertingEnabled)
     {
-        wxLogMessage(_T("REMEMBRANCER: Alert fired"));
+        //wxLogMessage(_T("REMEMBRANCER: Alert fired"));
 
         if (!m_alertWindow)
         {
@@ -168,14 +164,12 @@ void remembrancer_pi::SetPluginMessage(wxString &message_id, wxString &message_b
     //wxLogMessage(_T("REMEMBRANCER: JSON Message Received...\n") + message_body);
     if (message_id == _T("OCPN_RTE_ACTIVATED"))
     {
-        wxLogMessage(_T("REMEMBRANCER: ACTIVATED"));
         m_activeRoute = true;
         SetToolbarToolBitmaps(m_toolbar_item_id, _img_remembrancer_active, _img_remembrancer_active);
     }
 
     if (message_id == _T("OCPN_RTE_DEACTIVATED"))
     {
-        wxLogMessage(_T("REMEMBRANCER: DEACTIVATED"));
         m_activeRoute = false;
         SetToolbarToolBitmaps(m_toolbar_item_id, _img_remembrancer_inactive, _img_remembrancer_inactive);
     }
