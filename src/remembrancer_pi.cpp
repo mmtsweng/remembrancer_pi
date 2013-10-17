@@ -190,12 +190,17 @@ void remembrancer_pi::SetPluginMessage(wxString &message_id, wxString &message_b
 void remembrancer_pi::InitReminder()
 {
 
-    wxString message;
-    message.Printf(wxT("%d seconds per alarm"), m_reminderDelaySeconds);
-    wxLogMessage(message);
+    if (m_timer.IsRunning())
+    {
+        m_timer.Stop();
+        m_timer.Disconnect(wxEVT_TIMER, wxTimerEventHandler(remembrancer_pi::OnTimer), NULL, this);
+    }
 
     //Start Timer
-    wxLogMessage(_T("REMEMBRANCER: Starting Timer"));
+    wxString message;
+    message.Printf(wxT("REMEMBRANCER: Starting Timer at %d seconds per alarm"), m_reminderDelaySeconds);
+    wxLogMessage(message);
+
     m_timer.Connect(wxEVT_TIMER, wxTimerEventHandler(remembrancer_pi::OnTimer), NULL, this);
     m_timer.Start(m_reminderDelaySeconds * 1000);
 }
@@ -217,7 +222,6 @@ void remembrancer_pi::OnToolbarToolCallback(int id)
 {
     SetToolbarItemState(m_toolbar_item_id, false);
 
-    wxLogMessage(_T("REMEMBRANCER: Property Dialog Show"));
     if (!m_propertiesWindow)
     {
         m_propertiesWindow = new PropertyDialog(*this, m_parent_window);
@@ -227,12 +231,14 @@ void remembrancer_pi::OnToolbarToolCallback(int id)
 
         if (m_propertiesWindow->ShowModal() == wxID_OK)
         {
-            wxLogMessage(_T("REMEMBRANCER: Property Dialog Save"));
             m_alertFileWav = m_propertiesWindow->m_fipSoundFile->GetPath();
             m_alertingEnabled = m_propertiesWindow->m_ckEnabled->GetValue();
             m_reminderDelaySeconds = wxAtoi(m_propertiesWindow->m_txtDelay->GetValue());
             SaveConfig();
             m_propertiesWindow->Close();
+
+            //Restart Timer with new settings
+            InitReminder();
         }
     }
 }
