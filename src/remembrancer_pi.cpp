@@ -57,6 +57,9 @@ int remembrancer_pi::Init(void)
     // Get a pointer to the opencpn display canvas, to use as a parent for windows created
     m_parent_window = GetOCPNCanvasWindow();
 
+    // Get a reference to the OCPN Configuration object
+    m_pconfig = GetOCPNConfigObject();
+
     // Create the Context Menu Items
 
     //    In order to avoid an ASSERT on msw debug builds,
@@ -72,10 +75,13 @@ int remembrancer_pi::Init(void)
     m_hide_id = AddCanvasContextMenuItem(pmih, this );
     SetCanvasContextMenuItemViz(m_hide_id, false);
 
+    //Set Default values - not configuration values
     m_alertWindow = NULL;
     m_propertiesWindow = NULL;
     m_activeRoute = false;
+
     LoadConfig();
+    SaveConfig();
 
     InitReminder();
 
@@ -185,7 +191,13 @@ void remembrancer_pi::SetPluginMessage(wxString &message_id, wxString &message_b
 */
 void remembrancer_pi::InitReminder()
 {
+
+    wxString message;
+    message.Printf(wxT("%d seconds per alarm"), m_reminderDelaySeconds);
+    wxLogMessage(message);
+
     //Start Timer
+    wxLogMessage(_T("REMEMBRANCER: Starting Timer"));
     m_timer.Connect(wxEVT_TIMER, wxTimerEventHandler(remembrancer_pi::OnTimer), NULL, this);
     m_timer.Start(m_reminderDelaySeconds * 1000);
 }
@@ -219,25 +231,44 @@ void remembrancer_pi::OnToolbarToolCallback(int id)
 */
 bool remembrancer_pi::LoadConfig(void)
 {
-    return true;
     wxFileConfig *pConf = m_pconfig;
 
     if(!pConf)
     {
+        wxLogMessage(_T("REMEMBRANCER: No configuration"));
         return false;
     }
-    pConf->SetPath ( _T( "/Settings/Remembrancer" ) );
 
-    m_alertingEnabled = true;
-    m_alertPlaySound = false;
-    m_reminderDelaySeconds = 10; //By default alert every minute
+    pConf->SetPath ( _T( "/Settings/Remembrancer" ) );
+    pConf->Read ( _T( "AlertingEnabled" ),  &m_alertingEnabled, 1 );
+    pConf->Read ( _T( "AlertingDelaySeconds" ),  &m_reminderDelaySeconds, 60 );
+    pConf->Read ( _T( "PlaySound" ),     &m_alertPlaySound, 0 );
+    pConf->Read ( _T( "SoundFile" ),     &m_alertFileWav, _T("") );
+    wxLogMessage(_T("REMEMBRANCER: Configuration set"));
 
     return true;
 }
 
 bool remembrancer_pi::SaveConfig(void)
 {
-    return true;
+    wxFileConfig *pConf = m_pconfig;
+
+    if(pConf)
+    {
+        wxLogMessage(_T("REMEMBRANCER: Writing Configuration"));
+        pConf->SetPath ( _T ( "/Settings/Remembrancer" ) );
+        pConf->Write ( _T ( "AlertingEnabled" ), m_alertingEnabled );
+        pConf->Write ( _T ( "AlertingDelaySeconds" ), m_reminderDelaySeconds );
+        pConf->Write ( _T ( "PlaySound" ), m_alertPlaySound );
+        pConf->Write ( _T ( "SoundFile" ), m_alertFileWav );
+
+        return true;
+    }
+    else
+    {
+        wxLogMessage(_T("REMEMBRANCER: No configuration"));
+        return false;
+    }
 }
 
 void remembrancer_pi::ResetToolbarIcon()
@@ -355,7 +386,6 @@ int remembrancer_pi::GetToolbarToolCount(void)
 
 void remembrancer_pi::ShowPreferencesDialog( wxWindow* parent )
 {
-
 }
 
 void remembrancer_pi::SetPositionFixEx(PlugIn_Position_Fix_Ex &pfix)
