@@ -92,8 +92,8 @@ PropertyDialogBase::PropertyDialogBase( wxWindow* parent, wxWindowID id, const w
 	m_lblSoundFile->Wrap( -1 );
 	bSizer3->Add( m_lblSoundFile, 0, wxALL, 5 );
 	
-	m_fipSoundFile = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.wav"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE );
-	bSizer3->Add( m_fipSoundFile, 0, wxALL, 5 );
+	m_fipSoundFile = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.wav"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE|wxFLP_FILE_MUST_EXIST|wxFLP_OPEN );
+	bSizer3->Add( m_fipSoundFile, 4, wxALL, 5 );
 	
 	
 	bSizer2->Add( bSizer3, 1, wxEXPAND, 5 );
@@ -117,14 +117,12 @@ PropertyDialogBase::PropertyDialogBase( wxWindow* parent, wxWindowID id, const w
 	this->Centre( wxBOTH );
 	
 	// Connect Events
-	m_btnSave->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertyDialogBase::OnSave ), NULL, this );
 	m_btnCancel->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertyDialogBase::OnCancel ), NULL, this );
 }
 
 PropertyDialogBase::~PropertyDialogBase()
 {
 	// Disconnect Events
-	m_btnSave->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertyDialogBase::OnSave ), NULL, this );
 	m_btnCancel->Disconnect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( PropertyDialogBase::OnCancel ), NULL, this );
 	
 }

@@ -59,19 +59,18 @@ class PropertyDialogBase : public wxDialog
 	
 	protected:
 		wxStaticText* m_lblDelay;
-		wxTextCtrl* m_txtDelay;
-		wxCheckBox* m_ckEnabled;
 		wxStaticText* m_lblSoundFile;
-		wxFilePickerCtrl* m_fipSoundFile;
 		wxButton* m_btnSave;
 		wxButton* m_btnCancel;
 		
 		// Virtual event handlers, overide them in your derived class
-		virtual void OnSave( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
 		
 	
 	public:
+		wxTextCtrl* m_txtDelay;
+		wxCheckBox* m_ckEnabled;
+		wxFilePickerCtrl* m_fipSoundFile;
 		
 		PropertyDialogBase( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxT("Properties"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 300,220 ), long style = wxDEFAULT_DIALOG_STYLE ); 
 		~PropertyDialogBase();

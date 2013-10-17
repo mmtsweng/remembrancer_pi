@@ -1,3 +1,4 @@
+#include "remembrancer_pi.h"
 #include "propertydialog.h"
 
 /*
@@ -21,7 +22,7 @@ PropertyDialog::~PropertyDialog()
 */
 void PropertyDialog::OnCancel(wxCommandEvent &event)
 {
-    //m_remembrancer_pi.ResetToolbarIcon();
+    this->Close();
 }
 
 /*
@@ -29,7 +30,4 @@ void PropertyDialog::OnCancel(wxCommandEvent &event)
 */
 void PropertyDialog::OnSave(wxCommandEvent &event)
 {
-    //m_remembrancer_pi.SaveConfig();
-    //m_remembrancer_pi.m_reminderDelaySeconds = this->m_txtDelay.GetValue();
-    //m_remembrancer_pi.SaveConfig()
 }
