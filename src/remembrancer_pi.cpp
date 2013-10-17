@@ -81,8 +81,6 @@ int remembrancer_pi::Init(void)
     m_activeRoute = false;
 
     LoadConfig();
-    SaveConfig();
-
     InitReminder();
 
     // This PlugIn needs a toolbar icon
@@ -217,12 +215,26 @@ wxBitmap *remembrancer_pi::GetPlugInBitmap()
 */
 void remembrancer_pi::OnToolbarToolCallback(int id)
 {
+    SetToolbarItemState(m_toolbar_item_id, false);
+
     wxLogMessage(_T("REMEMBRANCER: Property Dialog Show"));
     if (!m_propertiesWindow)
     {
         m_propertiesWindow = new PropertyDialog(*this, m_parent_window);
+        m_propertiesWindow->m_txtDelay->SetValue(wxString::Format(_T("%d"), m_reminderDelaySeconds));
+        m_propertiesWindow->m_fipSoundFile->SetPath(m_alertFileWav);
+        m_propertiesWindow->m_ckEnabled->SetValue(m_alertingEnabled);
+
+        if (m_propertiesWindow->ShowModal() == wxID_OK)
+        {
+            wxLogMessage(_T("REMEMBRANCER: Property Dialog Save"));
+            m_alertFileWav = m_propertiesWindow->m_fipSoundFile->GetPath();
+            m_alertingEnabled = m_propertiesWindow->m_ckEnabled->GetValue();
+            m_reminderDelaySeconds = wxAtoi(m_propertiesWindow->m_txtDelay->GetValue());
+            SaveConfig();
+            m_propertiesWindow->Close();
+        }
     }
-    m_propertiesWindow->Show(true);
 }
 
 
@@ -240,11 +252,9 @@ bool remembrancer_pi::LoadConfig(void)
     }
 
     pConf->SetPath ( _T( "/Settings/Remembrancer" ) );
-    pConf->Read ( _T( "AlertingEnabled" ),  &m_alertingEnabled, 1 );
-    pConf->Read ( _T( "AlertingDelaySeconds" ),  &m_reminderDelaySeconds, 60 );
-    pConf->Read ( _T( "PlaySound" ),     &m_alertPlaySound, 0 );
-    pConf->Read ( _T( "SoundFile" ),     &m_alertFileWav, _T("") );
-    wxLogMessage(_T("REMEMBRANCER: Configuration set"));
+    pConf->Read ( _T( "AlertingEnabled" ), &m_alertingEnabled, 1 );
+    pConf->Read ( _T( "AlertingDelaySeconds" ), &m_reminderDelaySeconds, 60 );
+    pConf->Read ( _T( "SoundFile" ), &m_alertFileWav, _T("") );
 
     return true;
 }
@@ -259,8 +269,10 @@ bool remembrancer_pi::SaveConfig(void)
         pConf->SetPath ( _T ( "/Settings/Remembrancer" ) );
         pConf->Write ( _T ( "AlertingEnabled" ), m_alertingEnabled );
         pConf->Write ( _T ( "AlertingDelaySeconds" ), m_reminderDelaySeconds );
-        pConf->Write ( _T ( "PlaySound" ), m_alertPlaySound );
         pConf->Write ( _T ( "SoundFile" ), m_alertFileWav );
+
+        //Automatically write changes
+        delete pConf;
 
         return true;
     }
@@ -386,6 +398,7 @@ int remembrancer_pi::GetToolbarToolCount(void)
 
 void remembrancer_pi::ShowPreferencesDialog( wxWindow* parent )
 {
+
 }
 
 void remembrancer_pi::SetPositionFixEx(PlugIn_Position_Fix_Ex &pfix)

@@ -65,6 +65,7 @@ public:
     bool SaveConfig(void);
 
 
+
 private:
     //Private Methods
     void InitReminder();
@@ -76,7 +77,6 @@ private:
     wxTimer          m_timer;
     int              m_reminderDelaySeconds;
     wxString         m_alertFileWav;
-    bool             m_alertPlaySound;
     bool             m_alertingEnabled;
     bool             m_activeRoute;
 
