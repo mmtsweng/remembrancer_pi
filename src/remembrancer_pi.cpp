@@ -259,6 +259,9 @@ bool remembrancer_pi::LoadConfig(void)
     return true;
 }
 
+/*
+    Method to Save user defined settings to the opencpn.conf settings file
+*/
 bool remembrancer_pi::SaveConfig(void)
 {
     wxFileConfig *pConf = m_pconfig;
@@ -282,10 +285,19 @@ bool remembrancer_pi::SaveConfig(void)
     }
 }
 
+/*
+    Refresh icons
+*/
 void remembrancer_pi::ResetToolbarIcon()
 {
     RequestRefresh(m_parent_window);
 }
+
+
+//////////////////////////////////////
+//          Items Below are         //
+//        Common to all plugins     //
+//////////////////////////////////////
 
 
 int remembrancer_pi::GetAPIVersionMajor()
