@@ -151,6 +151,7 @@ void remembrancer_pi::OnTimer(wxTimerEvent& event)
             m_alertWindow = new AlertDialog(*this, m_parent_window);
         }
         m_alertWindow->Show(true);
+        PlayAlertSound();
     }
 }
 
@@ -214,26 +215,7 @@ wxBitmap *remembrancer_pi::GetPlugInBitmap()
 */
 void remembrancer_pi::OnToolbarToolCallback(int id)
 {
-    if (!m_propertiesWindow)
-    {
-        m_propertiesWindow = new PropertyDialog(*this, m_parent_window);
-        m_propertiesWindow->m_txtDelay->SetValue(wxString::Format(_T("%d"), m_reminderDelaySeconds));
-        m_propertiesWindow->m_fipSoundFile->SetPath(m_alertFileWav);
-        m_propertiesWindow->m_ckEnabled->SetValue(m_alertingEnabled);
-    }
-
-    if (m_propertiesWindow->ShowModal() == wxID_OK)
-    {
-        m_alertFileWav = m_propertiesWindow->m_fipSoundFile->GetPath();
-        m_alertingEnabled = m_propertiesWindow->m_ckEnabled->GetValue();
-        m_reminderDelaySeconds = wxAtoi(m_propertiesWindow->m_txtDelay->GetValue());
-        SaveConfig();
-        m_propertiesWindow->Close();
-
-        //Restart Timer with new settings
-        InitReminder();
-    }
-
+    ShowPropertiesWindow();
     SetToolbarItemState(m_toolbar_item_id, false);
 }
 
@@ -258,6 +240,7 @@ bool remembrancer_pi::LoadConfig(void)
 
     return true;
 }
+
 
 /*
     Method to Save user defined settings to the opencpn.conf settings file
@@ -285,12 +268,72 @@ bool remembrancer_pi::SaveConfig(void)
     }
 }
 
+
 /*
     Refresh icons
 */
 void remembrancer_pi::ResetToolbarIcon()
 {
     RequestRefresh(m_parent_window);
+}
+
+
+/*
+    Method to play the alert sound for 1 second max
+*/
+void remembrancer_pi::PlayAlertSound()
+{
+    if (m_alertFileWav.length()>0)
+    {
+        OCPN_Sound soundplayer;
+        soundplayer.Create(m_alertFileWav);
+        if(soundplayer.IsOk())
+        {
+            soundplayer.Play();
+            wxSleep(1);
+            if (soundplayer.IsPlaying())
+            {
+                soundplayer.Stop();
+            }
+        }
+    }
+}
+
+
+/*
+    Method to show the Properies window
+*/
+void remembrancer_pi::ShowPropertiesWindow()
+{
+    if (!m_propertiesWindow)
+    {
+        wxLogMessage(m_alertFileWav);
+        m_propertiesWindow = new PropertyDialog(*this, m_parent_window);
+        m_propertiesWindow->m_txtDelay->SetValue(wxString::Format(_T("%d"), m_reminderDelaySeconds));
+        m_propertiesWindow->m_fipSoundFile->SetPath(m_alertFileWav);
+        m_propertiesWindow->m_ckEnabled->SetValue(m_alertingEnabled);
+        m_propertiesWindow->Update();
+    }
+
+    if (m_propertiesWindow->ShowModal() == wxID_OK)
+    {
+        m_alertFileWav = m_propertiesWindow->m_fipSoundFile->GetPath();
+        m_alertingEnabled = m_propertiesWindow->m_ckEnabled->GetValue();
+        m_reminderDelaySeconds = wxAtoi(m_propertiesWindow->m_txtDelay->GetValue());
+        SaveConfig();
+        m_propertiesWindow->Close();
+
+        //Restart Timer with new settings
+        InitReminder();
+    }
+}
+
+/*
+    Method to show the properties window from the plugins screen
+*/
+void remembrancer_pi::ShowPreferencesDialog( wxWindow* parent )
+{
+    ShowPropertiesWindow();
 }
 
 
@@ -332,7 +375,7 @@ wxString remembrancer_pi::GetShortDescription()
 
 wxString remembrancer_pi::GetLongDescription()
 {
-      return _("Remembrancer PlugIn for OpenCPN\n\rPlugIn processing of NMEA messages and displaying an alert if the autopilot is engaged.");
+      return _("Remembrancer PlugIn for OpenCPN\n\rPlugIn that processes OCPN messages and displays an alert if a route is active (an autopilot is engaged).");
 
 }
 
@@ -405,11 +448,6 @@ bool remembrancer_pi::RenderGLOverlay(wxGLContext *pcontext, PlugIn_ViewPort *vp
 int remembrancer_pi::GetToolbarToolCount(void)
 {
     return 1;
-}
-
-void remembrancer_pi::ShowPreferencesDialog( wxWindow* parent )
-{
-
 }
 
 void remembrancer_pi::SetPositionFixEx(PlugIn_Position_Fix_Ex &pfix)

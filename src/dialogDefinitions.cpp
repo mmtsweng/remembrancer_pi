@@ -92,7 +92,7 @@ PropertyDialogBase::PropertyDialogBase( wxWindow* parent, wxWindowID id, const w
 	m_lblSoundFile->Wrap( -1 );
 	bSizer3->Add( m_lblSoundFile, 0, wxALL, 5 );
 	
-	m_fipSoundFile = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.wav"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE|wxFLP_FILE_MUST_EXIST|wxFLP_OPEN );
+	m_fipSoundFile = new wxFilePickerCtrl( this, wxID_ANY, wxEmptyString, wxT("Select a file"), wxT("*.wav"), wxDefaultPosition, wxDefaultSize, wxFLP_DEFAULT_STYLE|wxFLP_SAVE|wxFLP_USE_TEXTCTRL );
 	bSizer3->Add( m_fipSoundFile, 4, wxALL, 5 );
 	
 	

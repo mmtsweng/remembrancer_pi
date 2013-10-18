@@ -10,4 +10,3 @@ AlertDialog::~AlertDialog()
 {
     //dtor
 }
-

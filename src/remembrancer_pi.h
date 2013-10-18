@@ -20,6 +20,7 @@
 #include "time.h"
 #include "../include/opencpn/ocpn_plugin.h"
 #include "../include/nmea0183/nmea0183.h"
+#include "../include/opencpn/OCPN_Sound.h"
 #include "alertdialog.h"
 #include "propertydialog.h"
 
@@ -63,13 +64,13 @@ public:
     void SetPositionFixEx(PlugIn_Position_Fix_Ex &pfix);
     bool LoadConfig(void);
     bool SaveConfig(void);
-
-
+    void PlayAlertSound(void);
 
 private:
     //Private Methods
     void InitReminder();
     void ResetToolbarIcon();
+    void ShowPropertiesWindow();
 
     // UI Windows
     PropertyDialog   *m_propertiesWindow;
