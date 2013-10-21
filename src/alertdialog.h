@@ -1,7 +1,7 @@
 #ifndef ALERTDIALOG_H
 #define ALERTDIALOG_H
 
-#include <dialogDefinitions.h>
+#include "dialogDefinitions.h"
 
 class remembrancer_pi;
 

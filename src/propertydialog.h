@@ -1,7 +1,7 @@
 #ifndef PROPERTYDIALOG_H
 #define PROPERTYDIALOG_H
 
-#include <dialogDefinitions.h>
+#include "dialogDefinitions.h"
 
 class remembrancer_pi;
 
