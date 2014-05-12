@@ -12,7 +12,6 @@ class AlertDialog : public AlertDialogBase
         virtual ~AlertDialog();
     protected:
         remembrancer_pi &m_remembrancer_pi;
-        //void OnClose(wxCommandEvent &event);
     private:
 };
 
